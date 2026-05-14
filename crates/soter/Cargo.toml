@@ -1,0 +1,31 @@
+[package]
+name = "converge-soter-smt"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "SMT-backed safety and policy assurance suggestors for Converge."
+keywords = ["converge", "smt", "cvc5", "verification", "policy"]
+categories = ["algorithms"]
+
+[lib]
+name = "soter"
+path = "src/lib.rs"
+
+[dependencies]
+async-trait.workspace = true
+converge-pack.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+soter-cvc5-sys = { workspace = true, optional = true }
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+
+[features]
+default = []
+cvc5 = ["dep:soter-cvc5-sys", "soter-cvc5-sys/link"]
+
+[lints]
+workspace = true
