@@ -2,10 +2,9 @@ use async_trait::async_trait;
 use converge_pack::{
     AgentEffect, Context, ContextKey, DiagnosticPayload, ProvenanceSource, Suggestor,
 };
-use tracing::Instrument;
 
 use crate::backend::SmtBackend;
-use crate::provenance::{SOTER_PROVENANCE, suggestor_span};
+use crate::provenance::SOTER_PROVENANCE;
 use crate::types::{SmtError, SmtQuery};
 
 pub struct SmtSuggestor<B> {
@@ -52,13 +51,11 @@ where
         ctx.has(self.input_key) && !ctx.has(self.output_key)
     }
 
+    fn provenance(&self) -> &'static str {
+        SOTER_PROVENANCE.as_str()
+    }
+
     async fn execute(&self, ctx: &dyn Context) -> AgentEffect {
-        let span = suggestor_span(
-            "smt-solver",
-            self.input_key,
-            self.output_key,
-            ctx.count(self.input_key),
-        );
 
         async move {
             let mut proposals = Vec::new();
@@ -93,7 +90,6 @@ where
 
             AgentEffect::with_proposals(proposals)
         }
-        .instrument(span)
         .await
     }
 }
