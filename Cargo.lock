@@ -74,6 +74,8 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 [[package]]
 name = "converge-pack"
 version = "3.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54991908be2931ceee38bbbe27df06c18b936830b99b5106154ce98ed5c37c0f"
 dependencies = [
  "async-trait",
  "hex",
