@@ -73,7 +73,7 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
 name = "converge-pack"
-version = "3.8.1"
+version = "3.9.0"
 dependencies = [
  "async-trait",
  "hex",
@@ -84,14 +84,14 @@ dependencies = [
 
 [[package]]
 name = "converge-soter-cvc5-sys"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "cc",
 ]
 
 [[package]]
 name = "converge-soter-smt"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "async-trait",
  "converge-pack",

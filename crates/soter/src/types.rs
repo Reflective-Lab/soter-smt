@@ -161,11 +161,22 @@ impl SmtReport {
     }
 }
 
+/// Typed runtime-config view of an `SmtQuery`. JSON-serialized into
+/// `ExecutionIdentity.runtime_config` per the workspace
+/// `Runtime Config Encoding` standard.
+#[derive(serde::Serialize)]
+struct SmtRuntimeConfig {
+    timeout_ms: u64,
+    produce_model: bool,
+    produce_unsat_core: bool,
+}
+
 pub fn smt_runtime_config(query: &SmtQuery) -> String {
-    format!(
-        "timeout_ms={}; produce_model={}; produce_unsat_core={}",
-        query.timeout_ms, query.produce_model, query.produce_unsat_core
-    )
+    converge_pack::ExecutionIdentity::runtime_config_from_typed(&SmtRuntimeConfig {
+        timeout_ms: query.timeout_ms,
+        produce_model: query.produce_model,
+        produce_unsat_core: query.produce_unsat_core,
+    })
 }
 
 #[derive(Debug, Error)]
@@ -234,11 +245,16 @@ mod tests {
 
         assert_eq!(report.execution_identity.backend, "fake");
         assert!(report.execution_identity.native_identity.is_none());
+        // runtime_config is the JSON encoding of the typed
+        // `SmtRuntimeConfig` (workspace `Runtime Config Encoding`
+        // standard); verify the JSON shape carries the timeout key.
+        let parsed: serde_json::Value =
+            serde_json::from_str(&report.execution_identity.runtime_config)
+                .expect("runtime_config must be valid JSON");
         assert!(
-            report
-                .execution_identity
-                .runtime_config
-                .contains("timeout_ms=")
+            parsed.get("timeout_ms").is_some(),
+            "runtime_config JSON should carry timeout_ms; got: {}",
+            report.execution_identity.runtime_config
         );
     }
 

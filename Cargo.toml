@@ -6,7 +6,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 rust-version = "1.94.0"
 license = "MIT"
@@ -14,11 +14,11 @@ repository = "https://github.com/Reflective-Lab/soter-smt"
 
 [workspace.dependencies]
 # soter-internal
-soter-cvc5-sys = { path = "crates/cvc5-sys", package = "converge-soter-cvc5-sys", version = "0.2.0" }
-soter = { path = "crates/soter", package = "converge-soter-smt", version = "0.2.0" }
+soter-cvc5-sys = { path = "crates/cvc5-sys", package = "converge-soter-cvc5-sys", version = "0.2.1" }
+soter = { path = "crates/soter", package = "converge-soter-smt", version = "0.2.1" }
 
 # Converge contracts
-converge-pack = "3.8.1"
+converge-pack = "3.9.0"
 
 # Shared
 async-trait = "0.1"

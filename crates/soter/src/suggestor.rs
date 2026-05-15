@@ -56,7 +56,6 @@ where
     }
 
     async fn execute(&self, ctx: &dyn Context) -> AgentEffect {
-
         async move {
             let mut proposals = Vec::new();
             for fact in ctx.get(self.input_key) {
