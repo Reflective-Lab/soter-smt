@@ -20,6 +20,6 @@ pub use backend::{FakeSmtBackend, SmtBackend};
 #[cfg(feature = "cvc5")]
 pub use cvc5::Cvc5FfiBackend;
 pub use formation::{SoterCapability, formation_capabilities};
-pub use provenance::{ProvenanceSource, SOTER_PROVENANCE, UnknownProvenanceSource};
+pub use provenance::{SOTER_PROVENANCE, Soter};
 pub use suggestor::SmtSuggestor;
 pub use types::{SmtError, SmtEvidenceTier, SmtQuery, SmtReport, SmtStatus};

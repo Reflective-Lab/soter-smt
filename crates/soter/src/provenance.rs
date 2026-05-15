@@ -1,65 +1,39 @@
-use std::{fmt, str::FromStr};
+//! Soter's `ProvenanceSource` marker.
+//!
+//! Migrated to the [`converge_pack::ProvenanceSource`] trait. Public
+//! surface is unchanged at call sites:
+//! `SOTER_PROVENANCE.proposed_fact(...)` reads the same.
+//!
+//! The `converge-core` engine emits a uniform `suggestor.execute`
+//! tracing span automatically around every `Suggestor::execute`
+//! call. Soter's Suggestors override `Suggestor::provenance()` to
+//! return `SOTER_PROVENANCE.as_str()` so the engine's span carries
+//! the right origin.
 
-use converge_pack::{ContextKey, FactPayload, ProposalId, ProposedFact};
+use converge_pack::{ContextKey, ProvenanceSource};
 use tracing::Span;
 
+/// Marker type identifying soter-emitted facts.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum ProvenanceSource {
-    Soter,
-}
+pub struct Soter;
 
-impl ProvenanceSource {
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::Soter => "soter",
-        }
-    }
-
-    pub fn proposed_fact(
-        self,
-        key: ContextKey,
-        id: impl Into<ProposalId>,
-        payload: impl FactPayload + PartialEq,
-    ) -> ProposedFact {
-        ProposedFact::new(key, id, payload, self.as_str())
+impl ProvenanceSource for Soter {
+    fn as_str(&self) -> &'static str {
+        "soter"
     }
 }
 
-impl fmt::Display for ProvenanceSource {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(self.as_str())
-    }
-}
+/// Canonical provenance constant for soter. Use it to construct
+/// proposals: `SOTER_PROVENANCE.proposed_fact(key, id, payload)`.
+pub const SOTER_PROVENANCE: Soter = Soter;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct UnknownProvenanceSource {
-    value: String,
-}
-
-impl fmt::Display for UnknownProvenanceSource {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "unknown provenance source '{}'", self.value)
-    }
-}
-
-impl std::error::Error for UnknownProvenanceSource {}
-
-impl FromStr for ProvenanceSource {
-    type Err = UnknownProvenanceSource;
-
-    fn from_str(value: &str) -> Result<Self, Self::Err> {
-        match value {
-            "soter" => Ok(Self::Soter),
-            other => Err(UnknownProvenanceSource {
-                value: other.to_string(),
-            }),
-        }
-    }
-}
-
-pub const SOTER_PROVENANCE: ProvenanceSource = ProvenanceSource::Soter;
-
-pub fn suggestor_span(
+/// Legacy per-crate suggestor span helper.
+///
+/// Internal-only. The engine emits the canonical `suggestor.execute`
+/// span automatically; this helper exists only as a transitional shim
+/// for any in-crate call sites until they migrate to relying on the
+/// engine middleware. New code does not call this.
+pub(crate) fn suggestor_span(
     suggestor: &'static str,
     input_key: ContextKey,
     output_key: ContextKey,
@@ -80,9 +54,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn provenance_round_trips() {
-        assert_eq!("soter".parse(), Ok(ProvenanceSource::Soter));
-        assert_eq!(ProvenanceSource::Soter.to_string(), "soter");
+    fn provenance_string_is_stable() {
+        assert_eq!(SOTER_PROVENANCE.as_str(), "soter");
     }
 
     #[test]

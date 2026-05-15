@@ -1,5 +1,7 @@
 use async_trait::async_trait;
-use converge_pack::{AgentEffect, Context, ContextKey, DiagnosticPayload, Suggestor};
+use converge_pack::{
+    AgentEffect, Context, ContextKey, DiagnosticPayload, ProvenanceSource, Suggestor,
+};
 use tracing::Instrument;
 
 use crate::backend::SmtBackend;
