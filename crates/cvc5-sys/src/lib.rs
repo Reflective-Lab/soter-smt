@@ -6,6 +6,24 @@ use std::{
     os::raw::c_char,
 };
 
+pub const CVC5_NAME: &str = "CVC5";
+pub const CVC5_VERSION: &str = "1.3.3";
+pub const CVC5_TAG: &str = "cvc5-1.3.3";
+pub const CVC5_SOURCE_URL: &str = "https://github.com/cvc5/cvc5";
+pub const CVC5_EXPECTED_COMMIT: &str = "8ff882e3e42f046867d2ac2e33e92b3d026144ae";
+
+pub fn cvc5_source_mode() -> &'static str {
+    option_env!("SOTER_CVC5_SOURCE_MODE").unwrap_or("native-link-disabled")
+}
+
+pub fn cvc5_source_commit() -> &'static str {
+    option_env!("SOTER_CVC5_SOURCE_COMMIT").unwrap_or("native-link-disabled")
+}
+
+pub fn cvc5_configure_flags() -> &'static str {
+    option_env!("SOTER_CVC5_CONFIGURE_FLAGS").unwrap_or("--no-poly")
+}
+
 #[cfg(feature = "link")]
 unsafe extern "C" {
     fn soter_cvc5_version() -> *const c_char;

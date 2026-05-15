@@ -49,13 +49,15 @@ Yices, Boolector, or SAT-certificate backends if an app pulls on them.
 ## What Soter Owns
 
 - SMT query and report types.
-- SMT-LIB payload validation and stable hashing.
+- SMT-LIB payload validation and stable SHA-256 hashing.
 - Solver status vocabulary: `sat`, `unsat`, `unknown`, `timeout`, `error`.
 - Evidence tier mapping for SMT results.
 - Typed provenance at the proposal boundary.
 - `SmtSuggestor`, which reads `SmtQuery` JSON from context and emits
   `SmtReport` proposals.
 - Native CVC5 FFI boundary in `crates/cvc5-sys`.
+- `ArbiterExpenseCommitInvariant`, a typed abstract fixture for the first
+  Arbiter high-risk counterexample query.
 - Formation-facing capability descriptors under `soter.smt`.
 
 ## What Soter Does Not Own
@@ -108,7 +110,13 @@ Soter follows the Ferrox pattern:
 The first CVC5 FFI milestone links CVC5, retrieves the native version string,
 and checks SMT-LIB input through the C API. The safe `Cvc5FfiBackend` maps
 native `sat`, `unsat`, `unknown`, `timeout`, and `error` results into
-`SmtReport` values while keeping raw pointers inside `crates/cvc5-sys`.
+`SmtReport` values while keeping raw pointers inside `crates/cvc5-sys`. Native
+solves are dispatched through Tokio's blocking pool, and `SmtQuery` rejects
+timeouts above 60 seconds to keep seeded solver work operationally bounded.
+Each report carries Converge's shared `execution_identity`, which records the
+backend, linked version, expected and actual checkout commit, source mode,
+configure flags, runtime query options, and producer crate version for later
+audit and replay.
 
 ## Why Build From Source
 
@@ -200,6 +208,19 @@ let query = SmtQuery::new(
 
 let report = Cvc5FfiBackend.solve(&query).await?;
 assert_eq!(report.solver, "cvc5");
+assert_eq!(
+    report.execution_identity.native_identity.unwrap().backend,
+    "CVC5"
+);
+```
+
+Typed Arbiter invariant fixture:
+
+```rust
+use soter::{ArbiterExpenseCommitInvariant, SmtQuery};
+
+let query: SmtQuery = ArbiterExpenseCommitInvariant::strict().to_smt_query()?;
+assert!(query.smtlib.contains("claim_principal_non_finance"));
 ```
 
 Formation discovery:
@@ -227,15 +248,15 @@ Current capability IDs:
 
 ## Integration With Arbiter
 
-The first useful product pull should be conditional Arbiter invariant queries.
+The first useful product pull is a conditional Arbiter invariant query fixture.
 
-Bad first query:
+Bad query shape:
 
 ```text
 Is the whole policy always denying all modeled requests?
 ```
 
-Useful first query:
+Useful query shape:
 
 ```text
 Does there exist a modeled request where:
@@ -258,6 +279,21 @@ For that query:
 The hard part is the encoding. Soter does not magically understand Cedar. A
 product or Arbiter adapter must compile the relevant policy semantics into a
 sound SMT query.
+
+`ArbiterExpenseCommitInvariant` is the first rung of that bridge. It is a typed
+abstract model for the invariant:
+
+```text
+Non-finance supervisory principals cannot commit high-value expenses,
+even when receipt, manager approval, required gates, and human approval are
+present.
+```
+
+The strict model encodes the policy axiom that high-value expense commits
+require finance membership, so the counterexample query is `unsat`. The
+intentionally broken model allows approved supervisory commits, so the same
+counterexample query is `sat` and CVC5 returns a model. This is searched
+evidence over the generated abstraction, not full Cedar semantics.
 
 ## CI Policy
 

@@ -2,6 +2,8 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=cvc5_wrapper.h");
     println!("cargo:rerun-if-changed=cvc5_wrapper.cc");
+    println!("cargo:rerun-if-env-changed=SOTER_CVC5_ROOT");
+    println!("cargo:rerun-if-env-changed=CVC5_CONFIGURE_FLAGS");
 
     if std::env::var("CARGO_FEATURE_LINK").is_ok() {
         build_with_cvc5();
@@ -15,10 +17,17 @@ fn build_with_cvc5() {
     let workspace_root = manifest_dir.parent().unwrap().parent().unwrap();
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-    let cvc5_root = env::var("SOTER_CVC5_ROOT").map_or_else(
-        |_| workspace_root.join("vendor/cvc5/build/install"),
+    let external_root = env::var("SOTER_CVC5_ROOT").ok();
+    let cvc5_root = external_root.as_deref().map_or_else(
+        || workspace_root.join("vendor/cvc5/build/install"),
         PathBuf::from,
     );
+    let cvc5_src = if external_root.is_some() {
+        cvc5_root.clone()
+    } else {
+        workspace_root.join("vendor/cvc5")
+    };
+    emit_identity_metadata(external_root.is_some(), &cvc5_src);
     let include_dir = cvc5_root.join("include");
     let lib_dir = find_lib_dir(&cvc5_root);
 
@@ -83,4 +92,34 @@ fn copy_runtime_libraries(lib_dir: &std::path::Path, out_dir: &std::path::Path) 
             let _ = std::fs::copy(&path, out_dir.join(name));
         }
     }
+}
+
+fn emit_identity_metadata(external_root: bool, source_dir: &std::path::Path) {
+    let source_mode = if external_root {
+        "external-root"
+    } else {
+        "vendored"
+    };
+    let source_commit = git_head(source_dir).unwrap_or_else(|| "unavailable".to_string());
+    let configure_flags =
+        std::env::var("CVC5_CONFIGURE_FLAGS").unwrap_or_else(|_| "--no-poly".to_string());
+    println!("cargo:rustc-env=SOTER_CVC5_SOURCE_MODE={source_mode}");
+    println!("cargo:rustc-env=SOTER_CVC5_SOURCE_COMMIT={source_commit}");
+    println!("cargo:rustc-env=SOTER_CVC5_CONFIGURE_FLAGS={configure_flags}");
+}
+
+fn git_head(source_dir: &std::path::Path) -> Option<String> {
+    let output = std::process::Command::new("git")
+        .arg("-C")
+        .arg(source_dir)
+        .arg("rev-parse")
+        .arg("HEAD")
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let commit = String::from_utf8(output.stdout).ok()?;
+    let commit = commit.trim();
+    (!commit.is_empty()).then(|| commit.to_string())
 }

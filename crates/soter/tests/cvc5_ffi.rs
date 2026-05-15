@@ -31,6 +31,20 @@ async fn cvc5_solves_sat_smtlib() {
     let report = backend.solve(&query).await.unwrap();
 
     assert_eq!(report.solver, "cvc5");
+    assert_eq!(report.execution_identity.backend, "cvc5");
+    let native_identity = report
+        .execution_identity
+        .native_identity
+        .as_ref()
+        .expect("native CVC5 identity");
+    assert_eq!(native_identity.backend, "CVC5");
+    assert!(
+        report
+            .execution_identity
+            .runtime_config
+            .contains("timeout_ms=")
+    );
+    assert!(!native_identity.actual_commit.trim().is_empty());
     assert_eq!(report.status, SmtStatus::Sat);
     assert!(
         report

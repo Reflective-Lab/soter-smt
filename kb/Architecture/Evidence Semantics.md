@@ -11,6 +11,12 @@ It is stronger than an LLM argument and different from a Cedar runtime
 decision. It is still not formal proof unless an independent trusted checker
 accepts a proof artifact.
 
+Every `SmtReport` carries Converge's shared `execution_identity`. For native
+CVC5 reports this includes linked version, expected and actual checkout commit,
+source mode, configure flags, runtime query options, and producer crate version.
+This keeps audit/replay from treating the same SMT-LIB query run against
+different native bits or solver settings as identical evidence.
+
 ## Status Mapping
 
 | Status | Meaning | Suggested claim status |

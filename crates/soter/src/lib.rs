@@ -3,6 +3,7 @@
 //! Soter produces searched evidence. It does not promote facts directly and it
 //! does not turn SMT results into formal proof claims.
 
+pub mod arbiter;
 pub mod backend;
 #[cfg(feature = "cvc5")]
 pub mod cvc5;
@@ -11,6 +12,10 @@ pub mod provenance;
 pub mod suggestor;
 pub mod types;
 
+pub use arbiter::{
+    ArbiterExpenseCommitInvariant, ArbiterExpensePolicyModel,
+    EXPENSE_NON_FINANCE_HIGH_VALUE_COMMIT_INVARIANT_ID,
+};
 pub use backend::{FakeSmtBackend, SmtBackend};
 #[cfg(feature = "cvc5")]
 pub use cvc5::Cvc5FfiBackend;

@@ -2,7 +2,7 @@ use converge_pack::{
     ContentHash, Context, ContextFact, ContextKey, FactActor, FactActorKind, FactPromotionRecord,
     FactRemoteTrace, FactTraceLink, FactValidationSummary, Suggestor, Timestamp,
 };
-use soter::{FakeSmtBackend, SmtQuery, SmtStatus, SmtSuggestor};
+use soter::{FakeSmtBackend, SmtQuery, SmtReport, SmtStatus, SmtSuggestor};
 use std::collections::HashMap;
 
 struct MockContext {
@@ -10,14 +10,14 @@ struct MockContext {
 }
 
 impl MockContext {
-    fn with_seed(content: String) -> Self {
+    fn with_seed(query: SmtQuery) -> Self {
         let mut facts = HashMap::new();
         facts.insert(
             ContextKey::Seeds,
             vec![ContextFact::new_projection(
                 ContextKey::Seeds,
                 "seed-1",
-                content,
+                query,
                 FactPromotionRecord::new_projection(
                     "test-gate",
                     ContentHash::zero(),
@@ -52,7 +52,7 @@ impl Context for MockContext {
 #[tokio::test]
 async fn smt_suggestor_emits_searched_report() {
     let query = SmtQuery::new("arbiter.expense.non_finance_commit", "(check-sat)");
-    let ctx = MockContext::with_seed(serde_json::to_string(&query).unwrap());
+    let ctx = MockContext::with_seed(query);
     let suggestor = SmtSuggestor::new(FakeSmtBackend::unsat());
 
     assert!(suggestor.accepts(&ctx));
@@ -61,14 +61,17 @@ async fn smt_suggestor_emits_searched_report() {
     assert_eq!(effect.proposals().len(), 1);
     assert_eq!(effect.proposals()[0].key, ContextKey::Evaluations);
     assert_eq!(effect.proposals()[0].provenance(), "soter");
-    assert!(effect.proposals()[0].content().contains("\"searched\""));
-    assert!(effect.proposals()[0].content().contains("\"unsat\""));
+    let report = effect.proposals()[0]
+        .require_payload::<SmtReport>()
+        .expect("smt report payload");
+    assert_eq!(report.evidence_tier, soter::SmtEvidenceTier::Searched);
+    assert_eq!(report.status, SmtStatus::Unsat);
 }
 
 #[tokio::test]
 async fn smt_suggestor_routes_backend_errors_to_diagnostics() {
     let query = SmtQuery::new("bad", "(check-sat)");
-    let ctx = MockContext::with_seed(serde_json::to_string(&query).unwrap());
+    let ctx = MockContext::with_seed(query);
     let suggestor = SmtSuggestor::new(FakeSmtBackend::new(SmtStatus::Error));
 
     let effect = suggestor.execute(&ctx).await;

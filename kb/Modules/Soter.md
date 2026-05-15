@@ -14,8 +14,11 @@ extension.
 - Fake backend for CI and deterministic tests.
 - Native CVC5 FFI boundary.
 - SMT suggestor surface.
+- Typed abstract Arbiter invariant fixtures pulled by high-risk policy claims.
 - Formation capability descriptors.
 - Searched-evidence vocabulary.
+- Shared Converge `execution_identity` on reports for native version/build/
+  config audit.
 
 ## Public Surface
 
@@ -24,6 +27,8 @@ extension.
 - `SmtStatus`
 - `SmtBackend`
 - `FakeSmtBackend`
+- `ArbiterExpenseCommitInvariant`
+- `ArbiterExpensePolicyModel`
 - `SmtSuggestor`
 - `ProvenanceSource`
 - `formation_capabilities()`
@@ -41,4 +46,6 @@ extension.
 ## Boundary
 
 Converge owns promotion. Soter emits evidence. Arbiter remains the runtime
-policy gate for Cedar decisions.
+policy gate for Cedar decisions. Soter's Arbiter fixtures are generated
+abstractions for counterexample search; they are not a replacement for Cedar
+runtime evaluation or full Cedar semantics.

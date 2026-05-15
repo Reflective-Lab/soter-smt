@@ -47,6 +47,10 @@ clippy:
 # Formatting plus clippy
 lint: fmt-check clippy
 
+# Local release security audit
+security-audit:
+    cargo audit --deny warnings
+
 # Build pinned native CVC5 dependency
 deps:
     make cvc5

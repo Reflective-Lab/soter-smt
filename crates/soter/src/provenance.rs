@@ -1,6 +1,6 @@
 use std::{fmt, str::FromStr};
 
-use converge_pack::{ContextKey, ProposalId, ProposedFact};
+use converge_pack::{ContextKey, FactPayload, ProposalId, ProposedFact};
 use tracing::Span;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -19,9 +19,9 @@ impl ProvenanceSource {
         self,
         key: ContextKey,
         id: impl Into<ProposalId>,
-        content: impl Into<String>,
+        payload: impl FactPayload + PartialEq,
     ) -> ProposedFact {
-        ProposedFact::new(key, id, content, self.as_str())
+        ProposedFact::new(key, id, payload, self.as_str())
     }
 }
 
@@ -87,7 +87,11 @@ mod tests {
 
     #[test]
     fn proposed_fact_uses_canonical_source_string() {
-        let fact = SOTER_PROVENANCE.proposed_fact(ContextKey::Evaluations, "id", "{}");
+        let fact = SOTER_PROVENANCE.proposed_fact(
+            ContextKey::Evaluations,
+            "id",
+            converge_pack::TextPayload::new("{}"),
+        );
         assert_eq!(fact.provenance(), "soter");
     }
 }

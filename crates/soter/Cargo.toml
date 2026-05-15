@@ -18,10 +18,14 @@ async-trait.workspace = true
 converge-pack.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+sha2.workspace = true
 soter-cvc5-sys = { workspace = true, optional = true }
 thiserror.workspace = true
 tokio.workspace = true
 tracing.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
 
 [features]
 default = []

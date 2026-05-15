@@ -116,13 +116,14 @@ std::string unsat_core_string(Cvc5* solver) {
 }  // namespace
 
 const char* soter_cvc5_version(void) {
-  static std::string version;
-
-  Cvc5TermManager* tm = cvc5_term_manager_new();
-  Cvc5* solver = cvc5_new(tm);
-  version = cvc5_get_version(solver);
-  cvc5_delete(solver);
-  cvc5_term_manager_delete(tm);
+  static const std::string version = [] {
+    Cvc5TermManager* tm = cvc5_term_manager_new();
+    Cvc5* solver = cvc5_new(tm);
+    std::string out = cvc5_get_version(solver);
+    cvc5_delete(solver);
+    cvc5_term_manager_delete(tm);
+    return out;
+  }();
 
   return version.c_str();
 }

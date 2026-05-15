@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use converge_pack::{AgentEffect, Context, ContextKey, Suggestor};
+use converge_pack::{AgentEffect, Context, ContextKey, DiagnosticPayload, Suggestor};
 use tracing::Instrument;
 
 use crate::backend::SmtBackend;
@@ -61,7 +61,7 @@ where
         async move {
             let mut proposals = Vec::new();
             for fact in ctx.get(self.input_key) {
-                let query = match serde_json::from_str::<SmtQuery>(fact.content()) {
+                let query = match fact.require_payload::<SmtQuery>() {
                     Ok(query) => query,
                     Err(err) => {
                         proposals.push(diagnostic(
@@ -72,22 +72,16 @@ where
                     }
                 };
 
-                match self.backend.solve(&query).await {
-                    Ok(report) => match serde_json::to_string(&report) {
-                        Ok(content) => proposals.push(
-                            SOTER_PROVENANCE
-                                .proposed_fact(
-                                    self.output_key,
-                                    format!("smt-report-{}", report.query_id),
-                                    content,
-                                )
-                                .with_confidence(report.confidence()),
-                        ),
-                        Err(err) => proposals.push(diagnostic(
-                            format!("smt-serialize-error-{}", query.query_id),
-                            SmtError::Serialize(err.to_string()).to_string(),
-                        )),
-                    },
+                match self.backend.solve(query).await {
+                    Ok(report) => proposals.push(
+                        SOTER_PROVENANCE
+                            .proposed_fact(
+                                self.output_key,
+                                format!("smt-report-{}", report.query_id),
+                                report.clone(),
+                            )
+                            .with_confidence(report.confidence()),
+                    ),
                     Err(err) => proposals.push(diagnostic(
                         format!("smt-backend-error-{}", query.query_id),
                         err.to_string(),
@@ -106,10 +100,6 @@ fn diagnostic(id: impl Into<String>, message: impl Into<String>) -> converge_pac
     SOTER_PROVENANCE.proposed_fact(
         ContextKey::Diagnostic,
         id.into(),
-        serde_json::json!({
-            "source": "soter",
-            "message": message.into(),
-        })
-        .to_string(),
+        DiagnosticPayload::new("soter", message.into()),
     )
 }
