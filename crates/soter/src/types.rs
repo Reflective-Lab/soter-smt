@@ -245,16 +245,35 @@ mod tests {
 
         assert_eq!(report.execution_identity.backend, "fake");
         assert!(report.execution_identity.native_identity.is_none());
-        // runtime_config is the JSON encoding of the typed
-        // `SmtRuntimeConfig` (workspace `Runtime Config Encoding`
-        // standard); verify the JSON shape carries the timeout key.
+
+        // Replay-from-audit must recover the exact solver budget knobs that
+        // affect the answer: the wallclock timeout, whether a model is
+        // requested, and whether an unsat-core is requested. Asserting only
+        // "non-empty JSON" would silently pass through any change that drops
+        // a knob (e.g. coalescing produce_model + produce_unsat_core into
+        // one flag) — a behavioral break the audit log could no longer
+        // reconstruct.
         let parsed: serde_json::Value =
             serde_json::from_str(&report.execution_identity.runtime_config)
-                .expect("runtime_config must be valid JSON");
-        assert!(
-            parsed.get("timeout_ms").is_some(),
-            "runtime_config JSON should carry timeout_ms; got: {}",
-            report.execution_identity.runtime_config
+                .expect("runtime_config must be valid JSON per Runtime Config Encoding");
+        assert_eq!(
+            parsed.get("timeout_ms").and_then(serde_json::Value::as_u64),
+            Some(query.timeout_ms),
+            "runtime_config.timeout_ms must round-trip the query's wallclock budget"
+        );
+        assert_eq!(
+            parsed
+                .get("produce_model")
+                .and_then(serde_json::Value::as_bool),
+            Some(query.produce_model),
+            "runtime_config.produce_model must round-trip the model-emission flag"
+        );
+        assert_eq!(
+            parsed
+                .get("produce_unsat_core")
+                .and_then(serde_json::Value::as_bool),
+            Some(query.produce_unsat_core),
+            "runtime_config.produce_unsat_core must round-trip the unsat-core flag"
         );
     }
 

@@ -1,5 +1,16 @@
 # soter
 
+[![CI](https://github.com/Reflective-Lab/soter-smt/actions/workflows/ci.yml/badge.svg)](https://github.com/Reflective-Lab/soter-smt/actions/workflows/ci.yml)
+[![Coverage](https://github.com/Reflective-Lab/soter-smt/actions/workflows/coverage.yml/badge.svg)](https://github.com/Reflective-Lab/soter-smt/actions/workflows/coverage.yml)
+[![Security](https://github.com/Reflective-Lab/soter-smt/actions/workflows/security.yml/badge.svg)](https://github.com/Reflective-Lab/soter-smt/actions/workflows/security.yml)
+[![Stability](https://github.com/Reflective-Lab/soter-smt/actions/workflows/stability.yml/badge.svg)](https://github.com/Reflective-Lab/soter-smt/actions/workflows/stability.yml)
+[![Crates.io](https://img.shields.io/crates/v/converge-soter-smt.svg)](https://crates.io/crates/converge-soter-smt)
+[![docs.rs](https://docs.rs/converge-soter-smt/badge.svg)](https://docs.rs/converge-soter-smt)
+[![dependency status](https://deps.rs/repo/github/Reflective-Lab/soter-smt/status.svg)](https://deps.rs/repo/github/Reflective-Lab/soter-smt)
+![MSRV](https://img.shields.io/badge/MSRV-1.94.0-blue)
+<img alt="gitleaks badge" src="https://img.shields.io/badge/protected%20by-gitleaks-blue">
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 SMT-backed safety and policy assurance for Converge formations.
 
 Cargo package: `converge-soter-smt`. Rust library name: `soter`.

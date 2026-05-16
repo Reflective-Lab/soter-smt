@@ -1,0 +1,55 @@
+name: Coverage
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: "1.94.0"
+  # Coverage floor — lower than the workspace 80% baseline because the
+  # solver-execution path is gated behind the `cvc5` feature which CI
+  # cannot exercise without a native CVC5 install. The non-FFI surface
+  # (query modeling, report types, runtime_config encoding) must still
+  # carry real coverage.
+  COVERAGE_FLOOR: "70"
+
+jobs:
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          components: llvm-tools-preview
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov
+      - name: Generate coverage
+        # Excludes test, bench, example dirs, binary entry points, and the
+        # cvc5-sys FFI crate (its only meaningful code path requires the
+        # native CVC5 library and is exercised by integration tests, not
+        # by unit coverage).
+        run: |
+          cargo llvm-cov --workspace --lib --tests \
+            --ignore-filename-regex '(^|/)(tests|benches|examples)/|(^|/)(main|suggestor)\.rs$|crates/cvc5-sys/' \
+            --json --summary-only --output-path coverage.json
+      - name: Extract coverage percentage
+        id: cov
+        run: |
+          if [ -f coverage.json ]; then
+            COV=$(python3 -c "import json; d=json.load(open('coverage.json')); print(f\"{d['data'][0]['totals']['lines']['percent']:.1f}\")")
+            echo "percent=$COV" >> "$GITHUB_OUTPUT"
+            echo "### Coverage: ${COV}%" >> "$GITHUB_STEP_SUMMARY"
+            python3 -c "exit(0 if float('$COV') >= float('$COVERAGE_FLOOR') else 1)" || \
+              { echo "FAIL: coverage $COV% below ${COVERAGE_FLOOR}% floor" >&2 ; exit 1; }
+          else
+            echo "FAIL: coverage.json not produced" >&2
+            exit 1
+          fi
