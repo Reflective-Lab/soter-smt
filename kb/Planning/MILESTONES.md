@@ -9,6 +9,15 @@ Soter is pulled by the Arbiter high-risk invariant work. The point is not a
 generic SMT playground; the point is selected counterexample search for policy
 claims that are too important to leave as ordinary LLM arguments.
 
+## Shipped 2026-05-17 — v0.2.2 (Converge 3.9.1 alignment)
+
+- Bump `converge-pack` to `3.9.1`.
+- Back-port the 5-gate `release-check` recipe (security-audit, coverage,
+  performance-profile, soak, lint, test) plus `coverage`,
+  `performance-profile`, `soak` recipes from the converge-extension template.
+- First clean `just release-check` run.
+- Tag v0.2.2 and publish `converge-soter-cvc5-sys` + `converge-soter-smt`.
+
 ## Completed 2026-05-14
 
 - Created the `soter-smt` extension scaffold.

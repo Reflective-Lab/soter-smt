@@ -4,6 +4,22 @@ All notable changes to soter will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-05-17
+
+### Changed
+
+- Bump `converge-pack` to `3.9.1`.
+- Back-port the 5-gate `release-check` recipe (security-audit, coverage,
+  performance-profile, soak, lint, test) plus `coverage` / `performance-profile`
+  / `soak` recipes from the converge-extension template. First clean
+  `just release-check` run.
+
+## [0.2.1] - 2026-05-15
+
+### Changed
+
+- Bump `converge-pack` to `3.9.0`.
+
 ## [0.2.0] - 2026-05-15
 
 ### Added
