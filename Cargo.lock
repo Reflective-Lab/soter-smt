@@ -86,14 +86,14 @@ dependencies = [
 
 [[package]]
 name = "converge-soter-cvc5-sys"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "cc",
 ]
 
 [[package]]
 name = "converge-soter-smt"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "async-trait",
  "converge-pack",
