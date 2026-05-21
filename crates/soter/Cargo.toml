@@ -30,6 +30,15 @@ proptest.workspace = true
 [features]
 default = []
 cvc5 = ["dep:soter-cvc5-sys", "soter-cvc5-sys/link"]
+# Test-only scripted backend. Enables `ScriptedSmtBackend`. Never enable
+# transitively from production code paths: a default-features build of soter
+# has no concrete backend, forcing consumers to pick `cvc5` (real) or
+# `fake-backend` (test) by intent.
+fake-backend = []
+
+[[test]]
+name = "suggestor"
+required-features = ["fake-backend"]
 
 [lints]
 workspace = true

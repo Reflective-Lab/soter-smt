@@ -2,7 +2,7 @@ use converge_pack::{
     ContentHash, Context, ContextFact, ContextKey, FactActor, FactActorKind, FactPromotionRecord,
     FactRemoteTrace, FactTraceLink, FactValidationSummary, Suggestor, Timestamp,
 };
-use soter::{FakeSmtBackend, SmtQuery, SmtReport, SmtStatus, SmtSuggestor};
+use soter::{ScriptedSmtBackend, SmtQuery, SmtReport, SmtStatus, SmtSuggestor};
 use std::collections::HashMap;
 
 struct MockContext {
@@ -53,7 +53,7 @@ impl Context for MockContext {
 async fn smt_suggestor_emits_searched_report() {
     let query = SmtQuery::new("arbiter.expense.non_finance_commit", "(check-sat)");
     let ctx = MockContext::with_seed(query);
-    let suggestor = SmtSuggestor::new(FakeSmtBackend::unsat());
+    let suggestor = SmtSuggestor::new(ScriptedSmtBackend::unsat());
 
     assert!(suggestor.accepts(&ctx));
     let effect = suggestor.execute(&ctx).await;
@@ -72,7 +72,7 @@ async fn smt_suggestor_emits_searched_report() {
 async fn smt_suggestor_routes_backend_errors_to_diagnostics() {
     let query = SmtQuery::new("bad", "(check-sat)");
     let ctx = MockContext::with_seed(query);
-    let suggestor = SmtSuggestor::new(FakeSmtBackend::new(SmtStatus::Error));
+    let suggestor = SmtSuggestor::new(ScriptedSmtBackend::new(SmtStatus::Error));
 
     let effect = suggestor.execute(&ctx).await;
 

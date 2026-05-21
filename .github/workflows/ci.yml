@@ -38,7 +38,12 @@ jobs:
           toolchain: ${{ env.RUST_VERSION }}
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
-        run: cargo test --workspace --all-targets
+        # The integration test `tests/suggestor.rs` requires the
+        # `fake-backend` feature (the scripted test backend is gated out of
+        # default builds so consumers cannot accidentally use it in
+        # production evidence paths). Enable it here so CI exercises the
+        # suggestor wiring.
+        run: cargo test --workspace --all-targets --features converge-soter-smt/fake-backend
 
   lint:
     name: Lint

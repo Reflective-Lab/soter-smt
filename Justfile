@@ -24,13 +24,16 @@ check:
 check-cvc5:
     cargo check --workspace --features converge-soter-smt/cvc5
 
-# Run pure Rust/default tests
+# Run tests including the scripted-backend suggestor integration test.
+# The `fake-backend` feature is required to compile `ScriptedSmtBackend`;
+# default-features builds keep it out so consumers cannot fall through to a
+# scripted answer in place of real evidence.
 test:
-    cargo test --workspace
+    cargo test --workspace --features converge-soter-smt/fake-backend
 
 # Run tests with native CVC5 enabled. Requires `just deps`.
 test-cvc5:
-    cargo test --workspace --features converge-soter-smt/cvc5
+    cargo test --workspace --features "converge-soter-smt/cvc5 converge-soter-smt/fake-backend"
 
 # Check formatting
 fmt-check:
