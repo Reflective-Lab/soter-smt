@@ -16,9 +16,9 @@ pub use arbiter::{
     ArbiterExpenseCommitInvariant, ArbiterExpensePolicyModel,
     EXPENSE_NON_FINANCE_HIGH_VALUE_COMMIT_INVARIANT_ID,
 };
-pub use backend::SmtBackend;
 #[cfg(feature = "fake-backend")]
 pub use backend::ScriptedSmtBackend;
+pub use backend::SmtBackend;
 #[cfg(feature = "cvc5")]
 pub use cvc5::Cvc5FfiBackend;
 pub use formation::{SoterCapability, formation_capabilities};

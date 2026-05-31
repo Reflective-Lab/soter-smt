@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use converge_pack::{
-    AgentEffect, Context, ContextKey, DiagnosticPayload, ProvenanceSource, Suggestor,
+    AgentEffect, Context, ContextKey, DiagnosticPayload, Provenance, ProvenanceSource, Suggestor,
 };
 
 use crate::backend::SmtBackend;
@@ -51,8 +51,8 @@ where
         ctx.has(self.input_key) && !ctx.has(self.output_key)
     }
 
-    fn provenance(&self) -> &'static str {
-        SOTER_PROVENANCE.as_str()
+    fn provenance(&self) -> Provenance {
+        Provenance::from(SOTER_PROVENANCE.as_str())
     }
 
     async fn execute(&self, ctx: &dyn Context) -> AgentEffect {
