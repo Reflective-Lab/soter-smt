@@ -7,7 +7,7 @@
 [![Crates.io](https://img.shields.io/crates/v/converge-soter-smt.svg)](https://crates.io/crates/converge-soter-smt)
 [![docs.rs](https://docs.rs/converge-soter-smt/badge.svg)](https://docs.rs/converge-soter-smt)
 [![dependency status](https://deps.rs/repo/github/Reflective-Lab/soter-smt/status.svg)](https://deps.rs/repo/github/Reflective-Lab/soter-smt)
-![MSRV](https://img.shields.io/badge/MSRV-1.94.0-blue)
+![MSRV](https://img.shields.io/badge/MSRV-1.96.0-blue)
 <img alt="gitleaks badge" src="https://img.shields.io/badge/protected%20by-gitleaks-blue">
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
