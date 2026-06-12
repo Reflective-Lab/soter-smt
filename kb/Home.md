@@ -11,6 +11,10 @@ extension for Converge.
 `soter` produces searched evidence from SMT queries. It does not decide Cedar
 authorization, run analytics, optimize plans, or promote facts.
 
+## Positioning
+
+- [[Positioning]] - elevator pitch, LLM synergy, why formal methods matter now
+
 ## Architecture
 
 - [[Architecture/Surface]] - public Rust and Formation-facing surfaces
