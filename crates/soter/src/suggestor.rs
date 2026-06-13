@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use converge_pack::{
-    AgentEffect, Context, ContextKey, DiagnosticPayload, Provenance, ProvenanceSource, Suggestor,
+    AgentEffect, Context, ContextFact, ContextKey, DiagnosticPayload, Provenance, ProvenanceSource,
+    Suggestor,
 };
 
 use crate::backend::SmtBackend;
@@ -62,7 +63,8 @@ where
                 let query = match fact.require_payload::<SmtQuery>() {
                     Ok(query) => query,
                     Err(err) => {
-                        proposals.push(diagnostic(
+                        proposals.push(diagnostic_for(
+                            fact,
                             format!("smt-parse-error-{}", fact.id()),
                             SmtError::InvalidQuery(err.to_string()).to_string(),
                         ));
@@ -73,14 +75,16 @@ where
                 match self.backend.solve(query).await {
                     Ok(report) => proposals.push(
                         SOTER_PROVENANCE
-                            .proposed_fact(
+                            .proposed_fact_for(
+                                fact,
                                 self.output_key,
                                 format!("smt-report-{}", report.query_id),
                                 report.clone(),
                             )
                             .with_confidence(report.confidence()),
                     ),
-                    Err(err) => proposals.push(diagnostic(
+                    Err(err) => proposals.push(diagnostic_for(
+                        fact,
                         format!("smt-backend-error-{}", query.query_id),
                         err.to_string(),
                     )),
@@ -93,8 +97,13 @@ where
     }
 }
 
-fn diagnostic(id: impl Into<String>, message: impl Into<String>) -> converge_pack::ProposedFact {
-    SOTER_PROVENANCE.proposed_fact(
+fn diagnostic_for(
+    source: &ContextFact,
+    id: impl Into<String>,
+    message: impl Into<String>,
+) -> converge_pack::ProposedFact {
+    SOTER_PROVENANCE.proposed_fact_for(
+        source,
         ContextKey::Diagnostic,
         id.into(),
         DiagnosticPayload::new("soter", message.into()),
