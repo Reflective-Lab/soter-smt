@@ -20,6 +20,7 @@ authorization, run analytics, optimize plans, or promote facts.
 - [[Architecture/Surface]] - public Rust and Formation-facing surfaces
 - [[Architecture/CVC5 FFI Boundary]] - native build/link strategy and unsafe boundary
 - [[Architecture/Evidence Semantics]] - status and evidence-tier interpretation
+- [[Architecture/Cloud Run Deployment]] - soter-server as M2 of the gRPC suggestor pattern (CVC5 stays server-side; marquee-apps call over gRPC)
 
 ## Modules
 
