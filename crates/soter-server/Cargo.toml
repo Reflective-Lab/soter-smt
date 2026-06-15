@@ -1,0 +1,47 @@
+[package]
+name          = "converge-soter-server"
+version.workspace    = true
+edition.workspace    = true
+rust-version.workspace = true
+license.workspace    = true
+repository.workspace = true
+publish       = false
+description   = "gRPC server exposing the soter SMT solver (CVC5)"
+
+[lib]
+name = "converge_soter_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "soter-server"
+path = "src/main.rs"
+
+[features]
+default = ["full"]
+full    = ["dep:soter-cvc5-sys", "soter/cvc5", "soter-cvc5-sys/link"]
+
+[dependencies]
+soter                = { workspace = true }
+soter-cvc5-sys       = { workspace = true, optional = true }
+
+tonic                = { version = "0.14", features = ["tls-ring"] }
+tonic-prost          = "0.14"
+tonic-health         = "0.14"
+tonic-reflection     = "0.14"
+prost                = "0.14"
+tokio                = { workspace = true }
+tracing              = { workspace = true }
+tracing-subscriber   = { version = "0.3.23", features = ["env-filter", "json"] }
+anyhow               = "1"
+uuid                 = { version = "1", features = ["v4"] }
+sha2                 = { workspace = true }
+
+[build-dependencies]
+tonic-prost-build = "0.14"
+
+[dev-dependencies]
+serial_test = "3"
+temp-env    = "0.3"
+
+[lints]
+workspace = true

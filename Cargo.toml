@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/cvc5-sys",
     "crates/soter",
+    "crates/soter-server",
 ]
 
 [workspace.package]
