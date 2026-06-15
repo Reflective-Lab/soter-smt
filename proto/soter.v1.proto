@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package soter.v1;
+
+import "google/protobuf/empty.proto";
+
+option java_package    = "zone.soter.v1";
+option go_package      = "github.com/reflective-lab/soter/soterv1";
+
+message SmtQuery {
+  string query_id            = 1;
+  string smtlib              = 2;  // SMT-LIB v2 input
+  uint64 timeout_ms          = 3;
+  bool   produce_model       = 4;
+  bool   produce_unsat_core  = 5;
+}
+
+message SolverIdentity {
+  string solver              = 1;
+  string native_backend      = 2;  // "cvc5"
+  string native_version      = 3;
+  string rust_crate          = 4;
+  string rust_crate_version  = 5;
+}
+
+enum SmtStatusCode {
+  SMT_STATUS_UNSPECIFIED = 0;
+  SMT_STATUS_SAT         = 1;
+  SMT_STATUS_UNSAT       = 2;
+  SMT_STATUS_UNKNOWN     = 3;
+  SMT_STATUS_TIMEOUT     = 4;
+  SMT_STATUS_ERROR       = 5;
+}
+
+message SmtReport {
+  string         query_id           = 1;
+  string         query_hash         = 2;
+  SmtStatusCode  status             = 3;
+  SolverIdentity solver_identity    = 4;
+  optional string model             = 5;  // populated when status=SAT and produce_model
+  optional string unsat_core        = 6;  // populated when status=UNSAT and produce_unsat_core
+  optional string diagnostics       = 7;
+  double         wall_time_seconds  = 8;
+}
+
+message CheckRequest {
+  SmtQuery query = 1;
+}
+
+service SoterSolver {
+  rpc Check(CheckRequest) returns (SmtReport);
+  rpc Identity(google.protobuf.Empty) returns (SolverIdentity);
+}
