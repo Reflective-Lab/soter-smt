@@ -9,6 +9,8 @@ pub mod backend;
 pub mod cvc5;
 pub mod formation;
 pub mod provenance;
+#[cfg(feature = "remote")]
+pub mod remote;
 pub mod suggestor;
 pub mod types;
 
@@ -23,5 +25,7 @@ pub use backend::SmtBackend;
 pub use cvc5::Cvc5FfiBackend;
 pub use formation::{SoterCapability, formation_capabilities};
 pub use provenance::{SOTER_PROVENANCE, Soter};
+#[cfg(feature = "remote")]
+pub use remote::RemoteSmtBackend;
 pub use suggestor::SmtSuggestor;
 pub use types::{SmtError, SmtEvidenceTier, SmtQuery, SmtReport, SmtStatus};
