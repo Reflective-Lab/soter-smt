@@ -4,6 +4,32 @@ All notable changes to soter will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-16
+
+### Added
+
+- `RemoteSmtBackend` (gRPC client) behind the new `remote` Cargo feature on
+  `converge-soter-smt`. Implements `SmtBackend` by calling a deployed
+  `soter-server` over tonic. Injects `x-converge-app` + `x-request-id`
+  metadata; maps `SmtStatusCode` ↔ `SmtStatus`. Per spec §5.3.
+- `crates/soter-server/` — new gRPC service hosting `Cvc5FfiBackend`.
+  Tonic 0.14 + tonic-health + tonic-reflection + structured JSON logs +
+  per-RPC tracing spans. Mirrors the M1 ferrox-server template.
+- `proto/soter.v1.proto` — the wire contract (`Check` + `Identity` RPCs,
+  `SmtQuery` / `SmtReport` / `SolverIdentity` / `SmtStatusCode`).
+- `Dockerfile` (self-contained Stage 1 CVC5 + Stage 2 Rust + Stage 3
+  minimal runtime), `docker-compose.yml` (local dev, port 50052),
+  `ops/cloudbuild.prod.yaml`, `ops/cloudrun.prod.yaml`, `ops/iam-setup.sh`,
+  `ops/smoke.sh`.
+
+### Notes
+
+- v1 production deploy: `ingress=internal`, SA
+  `soter-server@reflective-labs.iam.gserviceaccount.com`. See
+  `kb/Architecture/Cloud Run Deployment.md` for live state once shipped.
+- Publish to crates.io is a separate ticket — local path patch unblocks
+  marquee-app M3 work in the meantime.
+
 ## [0.2.2] - 2026-05-17
 
 ### Changed
