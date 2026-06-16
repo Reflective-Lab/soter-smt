@@ -1,0 +1,36 @@
+# Cloud Build — soter-server image for Cloud Run (reflective-labs/prod).
+#
+# Usage:
+#   gcloud builds submit . \
+#       --project=reflective-labs \
+#       --config=ops/cloudbuild.prod.yaml \
+#       --substitutions=_TAG=v0.3.0-$(git rev-parse --short HEAD)
+#
+# The Dockerfile at repo root builds CVC5 in Stage 1 and compiles the
+# Rust server in Stage 2 — self-contained, no shared math-base.
+
+substitutions:
+  _TAG: "latest"
+  _REPO: "europe-west1-docker.pkg.dev/reflective-labs/converge"
+
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    env:
+      - "DOCKER_BUILDKIT=1"
+    args:
+      - "build"
+      - "-t"
+      - "${_REPO}/soter-server:${_TAG}"
+      - "-f"
+      - "Dockerfile"
+      - "."
+
+images:
+  - "${_REPO}/soter-server:${_TAG}"
+
+options:
+  machineType: "E2_HIGHCPU_8"
+  logging: CLOUD_LOGGING_ONLY
+  diskSizeGb: 100
+
+timeout: "3600s"

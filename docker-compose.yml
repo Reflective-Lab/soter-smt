@@ -1,0 +1,11 @@
+services:
+  soter-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: soter-server:dev
+    ports:
+      - "50052:50051"  # host port 50052 avoids clash with ferrox-server on 50051
+    environment:
+      - SOTER_ADDR=0.0.0.0:50051
+      - RUST_LOG=soter_server=info
