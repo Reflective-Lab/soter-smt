@@ -4,7 +4,8 @@
 FROM debian:trixie-slim AS cpp-builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential cmake git ca-certificates python3 python3-pip \
+    build-essential cmake git ca-certificates \
+    python3 python3-pip python3-venv \
     libgmp-dev pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
