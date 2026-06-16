@@ -41,7 +41,8 @@ COPY . /workspace/
 # Cargo.toml references. Mirrors the pattern from
 # mosaic-extensions/ferrox-solvers/Dockerfile (M1 fixup 312605d).
 RUN mkdir -p /bedrock-platform && \
-    git clone --depth=1 --quiet https://github.com/Reflective-Lab/converge.git /bedrock-platform/converge
+    git clone --depth=1 --quiet https://github.com/Reflective-Lab/converge.git /bedrock-platform/converge && \
+    git clone --depth=1 --quiet https://github.com/Reflective-Lab/organism.git /bedrock-platform/organism
 
 RUN sed -i \
       -e 's|path = "../../bedrock-platform/|path = "/bedrock-platform/|g' \
