@@ -64,9 +64,10 @@ pub fn smt_report_to_proto(report: SmtReport, wall_time_seconds: f64) -> pb::Smt
         native_backend: native
             .map(|n| n.backend.clone())
             .unwrap_or_default(),
-        native_version: native
-            .map(|n| n.version.clone())
-            .unwrap_or_else(|| report.execution_identity.backend_version.clone()),
+        native_version: native.map_or_else(
+            || report.execution_identity.backend_version.clone(),
+            |n| n.version.clone(),
+        ),
         rust_crate: report.execution_identity.producer.name.clone(),
         rust_crate_version: report.execution_identity.producer.version.clone(),
     };

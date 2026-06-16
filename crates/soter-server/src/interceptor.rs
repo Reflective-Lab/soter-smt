@@ -42,8 +42,7 @@ pub fn request_interceptor(mut req: Request<()>) -> Result<Request<()>, Status> 
         .metadata()
         .get("x-request-id")
         .and_then(|v| v.to_str().ok())
-        .map(String::from)
-        .unwrap_or_else(|| Uuid::new_v4().to_string());
+        .map_or_else(|| Uuid::new_v4().to_string(), String::from);
 
     req.extensions_mut().insert(TenantSlug(tenant.slug));
     req.extensions_mut().insert(RequestId(request_id));
