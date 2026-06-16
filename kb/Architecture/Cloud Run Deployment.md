@@ -45,3 +45,49 @@ M2 of the spec is entirely soter-smt work:
 
 M3 = quorum-sense flips to `RemoteSmtBackend`. Spec §8 M3 lists exact code-site
 changes. No work in soter-smt for M3 beyond the 0.3.0 publish.
+
+## Deployed state (M2 shipped 2026-06-16)
+
+| Field | Value |
+|---|---|
+| Project | `reflective-labs` (number 640630843925) |
+| Region | `europe-west1` |
+| Service URL | `https://soter-server-640630843925.europe-west1.run.app` |
+| Ingress | `internal` |
+| VPC connector | `solver-egress-ew1` (shared with ferrox-server) |
+| Service account | `soter-server@reflective-labs.iam.gserviceaccount.com` |
+| Image tag | `v0.3.0-6ee2f3a` |
+| Image registry | `europe-west1-docker.pkg.dev/reflective-labs/converge/soter-server` |
+| Concurrency | 1 (CVC5 single-process per query) |
+| Min / Max instances | 0 / 10 (cold-start acceptable per spec §10.4) |
+| CPU / Memory | 1 vCPU / 2 GiB |
+| Cloud Run timeout | 60s (headroom over the 30s spec SMT budget) |
+| Bearer auth | off (SOTER_AUTH_TOKEN unset; tenant header is the gate) |
+| Tenant allowlist | `quorum-sense` (8 in-flight) |
+| Health check | `grpc.health.v1.Health` via `tonic-health` |
+| Reflection | `grpc.reflection.v1.ServerReflection` via `tonic-reflection` |
+| Smoke script | `ops/smoke.sh <url>` |
+| Cloud Build SHA | `30e5f3ae-54eb-4d87-a6cd-bbe44a89fe30` (8m49s — partial layer cache hit) |
+| Workspace version | `converge-soter-smt = 0.3.0` (RemoteSmtBackend behind `remote` feature) |
+
+**Smoke verified 2026-06-16 — 5/5 checks:**
+- `grpc.health.v1.Health/Check` → `SERVING`
+- `grpcurl list` → `soter.v1.SoterSolver`, `grpc.health.v1.Health`, `grpc.reflection.v1.ServerReflection`
+- `SoterSolver/Check` without `x-converge-app` → `INVALID_ARGUMENT: missing x-converge-app header`
+- `SoterSolver/Check` with unknown tenant → `PERMISSION_DENIED: unknown tenant: <slug>`
+- `SoterSolver/Check` with `x-converge-app: quorum-sense` + trivial `(check-sat)` → `status: SMT_STATUS_SAT`, `solver: "cvc5"`, `nativeVersion: "1.3.3"`, query_hash present (`sha256:...`), wall_time ~101ms
+
+**Cloud Build journey (4 attempts, all real defects):**
+1. CVC5 cmake failed — Debian's `python3` lacks `venv`. Fixed by adding `python3-venv`.
+2. cargo couldn't resolve `organism-adversarial` — Dockerfile only cloned `bedrock-platform/converge`, not `bedrock-platform/organism`. Fixed.
+3. protoc missing `google/protobuf/empty.proto` — Debian's `protobuf-compiler` doesn't expose well-known types on the default search path. Fixed by dropping the import and using an inline `EmptyRequest`.
+4. SUCCESS.
+
+**Smoke connectivity:** ran via temporary `--ingress=all` flip from the dev laptop with a Google ID token (auth still required throughout). Restored to `--ingress=internal` immediately after. Cloud Shell is the canonical smoke runner once the user is at a terminal that has Cloud Shell access — see `ops/smoke.sh` header.
+
+## Unblocked
+
+**M3** — quorum-sense flips `cvc5` cfg gates to `remote-smt`. Spec §8 M3 has the
+exact code-site list. Soter-smt's 0.3.0 workspace bump is in; publish to
+crates.io is a separate ticket (M3 can use `[patch.crates-io]` path patch in
+the meantime).
