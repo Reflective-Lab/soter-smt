@@ -211,12 +211,17 @@ dependencies = [
  "converge-pack",
  "converge-soter-cvc5-sys",
  "proptest",
+ "prost",
  "serde",
  "serde_json",
  "sha2 0.10.9",
  "thiserror",
  "tokio",
+ "tonic",
+ "tonic-prost",
+ "tonic-prost-build",
  "tracing",
+ "uuid",
 ]
 
 [[package]]

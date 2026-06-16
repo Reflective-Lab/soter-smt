@@ -8,6 +8,7 @@ repository.workspace = true
 description = "SMT-backed safety and policy assurance suggestors for Converge."
 keywords = ["converge", "smt", "cvc5", "verification", "policy"]
 categories = ["algorithms"]
+build = "build.rs"
 
 [lib]
 name = "soter"
@@ -23,6 +24,14 @@ soter-cvc5-sys = { workspace = true, optional = true }
 thiserror.workspace = true
 tokio.workspace = true
 tracing.workspace = true
+# remote-only deps (optional)
+tonic       = { version = "0.14", features = ["tls-ring"], optional = true }
+tonic-prost = { version = "0.14", optional = true }
+prost       = { version = "0.14", optional = true }
+uuid        = { version = "1", features = ["v4"], optional = true }
+
+[build-dependencies]
+tonic-prost-build = "0.14"
 
 [dev-dependencies]
 proptest.workspace = true
@@ -35,6 +44,13 @@ cvc5 = ["dep:soter-cvc5-sys", "soter-cvc5-sys/link"]
 # has no concrete backend, forcing consumers to pick `cvc5` (real) or
 # `fake-backend` (test) by intent.
 fake-backend = []
+# `remote` enables RemoteSmtBackend — a gRPC client implementing SmtBackend
+# by calling a deployed soter-server. Marquee-apps in production use this.
+# Mutually exclusive with `cvc5` at the marquee-app level (the M3 wiring in
+# quorum-sense flips `cvc5` → `remote` cfg gates). Both features can be on
+# in this crate simultaneously; the consumer picks which Backend impl to
+# wire.
+remote = ["dep:tonic", "dep:tonic-prost", "dep:prost", "dep:uuid"]
 
 [[test]]
 name = "suggestor"
