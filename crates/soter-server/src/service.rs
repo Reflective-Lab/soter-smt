@@ -113,7 +113,7 @@ impl SoterSolver for SoterSolverService {
 
     async fn identity(
         &self,
-        _request: Request<()>,
+        _request: Request<crate::proto::soter::v1::EmptyRequest>,
     ) -> Result<Response<SolverIdentity>, Status> {
         // Identity is still inside the with_interceptor stack in main.rs, so
         // the `x-converge-app` header is required for it too. That is fine for

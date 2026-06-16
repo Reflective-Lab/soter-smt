@@ -2,10 +2,14 @@ syntax = "proto3";
 
 package soter.v1;
 
-import "google/protobuf/empty.proto";
-
 option java_package    = "zone.soter.v1";
 option go_package      = "github.com/reflective-lab/soter/soterv1";
+
+// Inline EmptyRequest instead of `google.protobuf.Empty` — Debian's
+// `protobuf-compiler` package doesn't expose well-known types on the
+// default protoc include path, and adding a search path is more fragile
+// than just defining a one-line empty message.
+message EmptyRequest {}
 
 message SmtQuery {
   string query_id            = 1;
@@ -49,5 +53,5 @@ message CheckRequest {
 
 service SoterSolver {
   rpc Check(CheckRequest) returns (SmtReport);
-  rpc Identity(google.protobuf.Empty) returns (SolverIdentity);
+  rpc Identity(EmptyRequest) returns (SolverIdentity);
 }
