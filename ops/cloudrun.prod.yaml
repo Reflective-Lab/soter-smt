@@ -1,0 +1,60 @@
+# Cloud Run service manifest — soter-server, prod, reflective-labs.
+#
+# Apply with:
+#   gcloud run services replace ops/cloudrun.prod.yaml \
+#       --project=reflective-labs --region=europe-west1
+#
+# IMPORTANT: when re-deploying with a new image tag, update
+# spec.template.spec.containers[0].image to the exact tag pushed by
+# `just deploy-build` (or gcloud builds submit) BEFORE applying.
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: soter-server
+  labels:
+    app: soter-server
+    extension: soter
+    platform: converge
+  annotations:
+    # Internal-only ingress per spec §7.1.
+    run.googleapis.com/ingress: internal
+spec:
+  template:
+    metadata:
+      annotations:
+        # SMT cold-start acceptable for reachability checks (not on the hot
+        # user path) per spec §10.4 — start at 0, scale up to 10.
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        # VPC connector for ingress=internal callers to reach us. Shared with
+        # ferrox-server.
+        run.googleapis.com/vpc-access-connector: solver-egress-ew1
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+    spec:
+      serviceAccountName: soter-server@reflective-labs.iam.gserviceaccount.com
+      # CVC5 queries are single-process per request like CP-SAT.
+      containerConcurrency: 1
+      # SMT queries are bounded at ~30s per spec budget; 60s leaves headroom.
+      timeoutSeconds: 60
+      containers:
+        - image: europe-west1-docker.pkg.dev/reflective-labs/converge/soter-server:v0.3.0-6ee2f3a
+          ports:
+            # name: h2c — tells Cloud Run to use HTTP/2 cleartext to the
+            # container. Cloud Run still terminates client-facing TLS.
+            - name: h2c
+              containerPort: 50051
+          resources:
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+          env:
+            - name: SOTER_ADDR
+              value: "0.0.0.0:50051"
+            - name: RUST_LOG
+              value: "soter_server=info"
+            # No SOTER_AUTH_TOKEN in v1 — tenant header is the only gate
+            # (spec §7.2). Set this only when the bearer-auth upgrade is wanted.
+  traffic:
+    - latestRevision: true
+      percent: 100
