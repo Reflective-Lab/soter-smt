@@ -84,14 +84,31 @@ impl RemoteSmtBackend {
     ///
     /// # Errors
     /// Returns a `tonic::transport::Error` if the URL is malformed, DNS
-    /// fails, the TCP connect fails, or the h2 preface times out.
+    /// fails, the TCP connect fails, the TLS handshake fails, or the h2
+    /// preface times out.
     pub async fn new(
         server_url: &str,
         tenant_app: &str,
     ) -> Result<Self, tonic::transport::Error> {
-        let endpoint = tonic::transport::Endpoint::from_shared(server_url.to_string())?
+        // tonic 0.14 + rustls 0.23: the crypto provider must be installed
+        // before any ClientTlsConfig is constructed. Without this, HTTPS
+        // endpoints fail with a generic "transport error" at TLS init —
+        // before any network packets are sent. Idempotent (install_default
+        // returns an error on duplicate install, which we swallow).
+        let _ = rustls::crypto::ring::default_provider().install_default();
+
+        let mut endpoint = tonic::transport::Endpoint::from_shared(server_url.to_string())?
             .timeout(Duration::from_secs(DEFAULT_CALL_TIMEOUT_SECS))
             .connect_timeout(Duration::from_secs(DEFAULT_CONNECT_TIMEOUT_SECS));
+
+        // Explicit TLS config for HTTPS endpoints. tls-webpki-roots bundles
+        // Mozilla's CA bundle but tonic 0.14 doesn't auto-apply it — you
+        // have to construct ClientTlsConfig and call `.with_webpki_roots()`.
+        if server_url.starts_with("https://") {
+            let tls_config = tonic::transport::ClientTlsConfig::new().with_webpki_roots();
+            endpoint = endpoint.tls_config(tls_config)?;
+        }
+
         let channel = endpoint.connect().await?;
         Ok(Self {
             client: SoterSolverClient::new(channel),

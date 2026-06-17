@@ -34,6 +34,11 @@ tonic       = { version = "0.14", features = ["tls-ring", "tls-webpki-roots"], o
 tonic-prost = { version = "0.14", optional = true }
 prost       = { version = "0.14", optional = true }
 uuid        = { version = "1", features = ["v4"], optional = true }
+# rustls 0.23+ requires explicit crypto provider install before any TLS
+# config is built. tonic 0.14's `tls-ring` brings rustls in transitively
+# but doesn't auto-install the provider — we do it explicitly in
+# RemoteSmtBackend::new (install_default returns Err on duplicate, ignored).
+rustls      = { version = "0.23", default-features = false, features = ["ring"], optional = true }
 
 [build-dependencies]
 tonic-prost-build = "0.14"
@@ -55,7 +60,7 @@ fake-backend = []
 # quorum-sense flips `cvc5` → `remote` cfg gates). Both features can be on
 # in this crate simultaneously; the consumer picks which Backend impl to
 # wire.
-remote = ["dep:tonic", "dep:tonic-prost", "dep:prost", "dep:uuid"]
+remote = ["dep:tonic", "dep:tonic-prost", "dep:prost", "dep:uuid", "dep:rustls"]
 
 [[test]]
 name = "suggestor"

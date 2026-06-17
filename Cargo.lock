@@ -176,14 +176,14 @@ dependencies = [
 
 [[package]]
 name = "converge-soter-cvc5-sys"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "cc",
 ]
 
 [[package]]
 name = "converge-soter-server"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "anyhow",
  "converge-soter-cvc5-sys",
@@ -205,13 +205,14 @@ dependencies = [
 
 [[package]]
 name = "converge-soter-smt"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "async-trait",
  "converge-pack",
  "converge-soter-cvc5-sys",
  "proptest",
  "prost",
+ "rustls",
  "serde",
  "serde_json",
  "sha2 0.10.9",
