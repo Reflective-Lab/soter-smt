@@ -25,7 +25,12 @@ thiserror.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 # remote-only deps (optional)
-tonic       = { version = "0.14", features = ["tls-ring"], optional = true }
+# tls-ring provides the rustls crypto provider; tls-webpki-roots bundles
+# Mozilla CA roots so the client can validate Cloud Run's HTTPS cert. Without
+# the roots feature the HTTPS handshake fails instantly with a generic
+# "transport error" — discovered during M3 deploy when quorum-sense couldn't
+# reach soter-server over the wire.
+tonic       = { version = "0.14", features = ["tls-ring", "tls-webpki-roots"], optional = true }
 tonic-prost = { version = "0.14", optional = true }
 prost       = { version = "0.14", optional = true }
 uuid        = { version = "1", features = ["v4"], optional = true }

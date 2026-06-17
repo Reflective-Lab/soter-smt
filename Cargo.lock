@@ -176,14 +176,14 @@ dependencies = [
 
 [[package]]
 name = "converge-soter-cvc5-sys"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "cc",
 ]
 
 [[package]]
 name = "converge-soter-server"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "converge-soter-cvc5-sys",
@@ -205,7 +205,7 @@ dependencies = [
 
 [[package]]
 name = "converge-soter-smt"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "async-trait",
  "converge-pack",
@@ -1408,6 +1408,7 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tracing",
+ "webpki-roots",
 ]
 
 [[package]]
@@ -1765,6 +1766,15 @@ dependencies = [
  "hashbrown 0.15.5",
  "indexmap",
  "semver",
+]
+
+[[package]]
+name = "webpki-roots"
+version = "1.0.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf85cb06032201fa7c6f829d7db5a7e5aa45bcc0655327713065f6f0576731bf"
+dependencies = [
+ "rustls-pki-types",
 ]
 
 [[package]]
